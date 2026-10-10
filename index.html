@@ -19,6 +19,13 @@
 <meta property="og:image" content="https://dogannakliyatt.github.io/dogan-nakliyat-web/images/banner.webp">
 <meta property="og:url" content="https://dogannakliyatt.github.io/dogan-nakliyat-web/">
 
+<script>
+/* Sayfa ilk açılırken tarayıcının eski kaydırma konumunu geri yüklemesini önle */
+if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+}
+</script>
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -726,7 +733,7 @@ footer {
     box-shadow: 0 8px 25px rgba(0,0,0,.2);
 }
 
-/* YUKARI ÇIK BUTONU - TAM ORTALI SVG OK */
+/* YUKARI ÇIK BUTONU - ORTALI SVG OK */
 
 .back-top {
     position: fixed;
@@ -1616,6 +1623,34 @@ footer {
 <script>
 (function () {
     "use strict";
+
+    /* SAYFA ACILISINDA EN USTE DON */
+
+    if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+    }
+
+    function resetInitialScroll() {
+        /*
+         * Adresin sonunda #teklif gibi bir bolum varsa
+         * o bolume gitmesine izin ver.
+         */
+        if (window.location.hash) return;
+
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "instant"
+        });
+    }
+
+    window.addEventListener("pageshow", function () {
+        resetInitialScroll();
+    });
+
+    window.addEventListener("load", function () {
+        resetInitialScroll();
+    });
 
     /* MOBILE MENU */
 
