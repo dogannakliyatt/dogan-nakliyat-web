@@ -6,22 +6,17 @@
 
     <!-- SEO -->
     <title>Doğan Nakliyat | Şehir İçi ve Şehirler Arası Nakliye</title>
-
-    <meta name="description" content="Doğan Nakliyat ile şehir içi ve şehirler arası güvenilir nakliye hizmeti. Hemen fiyat teklifi alın. Telefon: 0539 912 33 06.">
-
+    <meta name="description" content="Doğan Nakliyat ile şehir içi ve şehirler arası güvenilir nakliye hizmeti. WhatsApp üzerinden fiyat teklifi alın. Telefon: 0539 912 33 06.">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#101d33">
 
-    <!-- Yeni GitHub Pages adresi -->
     <link rel="canonical" href="https://dogannakliyatt.github.io/dogan-nakliyat-web/">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
 
     <style>
         :root {
             --primary: #101d33;
-            --primary-light: #1b3152;
+            --primary-light: #20395d;
             --accent: #22c55e;
             --accent-dark: #16a34a;
             --background: #f6f8fb;
@@ -49,6 +44,7 @@
             background: var(--background);
             color: var(--text);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         a {
@@ -114,7 +110,7 @@
             color: var(--text);
             font-size: 14px;
             font-weight: 600;
-            transition: 0.2s;
+            transition: color 0.2s;
         }
 
         .nav-links a:hover {
@@ -278,11 +274,13 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            transition: 0.25s;
+            transition:
+                opacity 0.8s ease,
+                transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.25s;
         }
 
         .service-card:hover {
-            transform: translateY(-5px);
             border-color: #bbf7d0;
         }
 
@@ -575,6 +573,63 @@
             transform: translateY(-3px);
         }
 
+        /* SCROLL REVEAL ANIMATIONS */
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(55px) scale(0.94);
+            transition:
+                opacity 0.8s ease,
+                transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .service-card:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .service-card:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .service-card:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+
+        /* HERO ENTRANCE ANIMATION */
+
+        @keyframes heroEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(35px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-badge {
+            animation: heroEntrance 0.7s ease both;
+        }
+
+        .hero h2 {
+            animation: heroEntrance 0.8s ease 0.15s both;
+        }
+
+        .hero p {
+            animation: heroEntrance 0.8s ease 0.3s both;
+        }
+
+        .hero-buttons {
+            animation: heroEntrance 0.8s ease 0.45s both;
+        }
+
         /* RESPONSIVE */
 
         @media (max-width: 900px) {
@@ -670,6 +725,25 @@
                 font-size: 12px;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .reveal {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+
+            .hero-badge,
+            .hero h2,
+            .hero p,
+            .hero-buttons {
+                animation: none;
+            }
+        }
     </style>
 </head>
 
@@ -703,9 +777,9 @@
         </div>
     </header>
 
-    <!-- HERO -->
-
     <main>
+
+        <!-- HERO -->
 
         <div class="hero" id="anasayfa">
             <div class="container">
@@ -723,7 +797,7 @@
 
                     <p>
                         Doğan Nakliyat olarak şehir içi ve şehirler arası
-                        nakliye ihtiyaçlarınız için güvenilir, düzenli
+                        nakliye işleriniz için güvenilir, düzenli
                         ve profesyonel taşımacılık hizmeti sunuyoruz.
                     </p>
 
@@ -930,7 +1004,7 @@
                     </p>
 
                     <p>
-                        Nakliye ihtiyaçlarınız hakkında
+                        Nakliye işleriniz hakkında
                         bilgi almak ve fiyat teklifi
                         oluşturmak için bizimle
                         iletişime geçebilirsiniz.
@@ -1067,6 +1141,8 @@
     <!-- JAVASCRIPT -->
 
     <script>
+        /* WHATSAPP OFFER SYSTEM */
+
         const offerForm = document.getElementById("offerForm");
 
         offerForm.addEventListener("submit", function(event) {
@@ -1105,6 +1181,48 @@
                 encodeURIComponent(message);
 
             window.location.href = whatsappURL;
+        }
+
+        /* SCROLL REVEAL SYSTEM */
+
+        const revealElements = document.querySelectorAll(
+            ".service-card, .section-header, .offer-info, .offer-card, .about-box, .contact-card"
+        );
+
+        const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        if (!prefersReducedMotion && "IntersectionObserver" in window) {
+
+            const revealObserver = new IntersectionObserver(
+                (entries, observer) => {
+
+                    entries.forEach(entry => {
+
+                        if (entry.isIntersecting) {
+
+                            entry.target.classList.add("active");
+                            observer.unobserve(entry.target);
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.1,
+                    rootMargin: "0px 0px -30px 0px"
+                }
+            );
+
+            revealElements.forEach(element => {
+
+                element.classList.add("reveal");
+                revealObserver.observe(element);
+
+            });
+
         }
     </script>
 
