@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO -->
+    <title>Doğan Nakliyat | Şehir İçi ve Şehirler Arası Nakliye</title>
+
+    <meta name="description" content="Doğan Nakliyat ile şehir içi ve şehirler arası güvenilir nakliye hizmeti. Hemen fiyat teklifi alın. Telefon: 0539 912 33 06.">
+
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#101d33">
+
+    <!-- Yeni GitHub Pages adresi -->
+    <link rel="canonical" href="https://dogannakliyatt.github.io/dogan-nakliyat-web/">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        :root {
+            --primary: #101d33;
+            --primary-light: #1b3152;
+            --accent: #22c55e;
+            --accent-dark: #16a34a;
+            --background: #f6f8fb;
+            --white: #ffffff;
+            --text: #182338;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 14px;
+            --shadow: 0 8px 30px rgba(16, 29, 51, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 90px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        /* HEADER */
+
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 85px;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .brand-text h1 {
+            font-size: 21px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.3;
+        }
+
+        .brand-text span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-dark);
+        }
+
+        .nav-contact {
+            background: var(--primary);
+            color: white !important;
+            padding: 11px 18px;
+            border-radius: 8px;
+        }
+
+        /* HERO */
+
+        .hero {
+            background: linear-gradient(135deg, #101d33 0%, #20395d 100%);
+            color: white;
+            padding: 105px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.025);
+            right: -130px;
+            top: -180px;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 750px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 7px 14px;
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.35);
+            border-radius: 30px;
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .hero h2 {
+            font-size: clamp(32px, 5vw, 54px);
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin-bottom: 23px;
+        }
+
+        .hero h2 span {
+            color: #4ade80;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin-bottom: 35px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 13px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 25px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: 700;
+            transition: 0.25s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-green {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-green:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* GENERAL SECTIONS */
+
+        .section {
+            padding: 85px 0;
+        }
+
+        .section-white {
+            background: white;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 45px;
+        }
+
+        .section-label {
+            display: inline-block;
+            color: var(--accent-dark);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(26px, 4vw, 35px);
+            color: var(--primary);
+            margin-bottom: 14px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        /* SERVICES */
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 23px;
+        }
+
+        .service-card {
+            background: white;
+            padding: 35px 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: 0.25s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: #bbf7d0;
+        }
+
+        .service-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 13px;
+            background: #ecfdf5;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 25px;
+        }
+
+        .service-card h3 {
+            font-size: 19px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .service-card p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        /* OFFER */
+
+        .offer-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .offer-info h2 {
+            font-size: clamp(27px, 4vw, 37px);
+            line-height: 1.3;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .offer-info p {
+            color: var(--muted);
+            margin-bottom: 25px;
+        }
+
+        .offer-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 17px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .check {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+            background: #dcfce7;
+            color: #15803d;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        .offer-card {
+            background: white;
+            padding: 38px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 50px rgba(16,29,51,0.07);
+        }
+
+        .offer-card h3 {
+            font-size: 23px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .offer-card > p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 21px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 9px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 15px;
+            background: #fff;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-dark);
+            box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 17px;
+            border: none;
+            border-radius: 9px;
+            background: #16a34a;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #15803d;
+        }
+
+        .form-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 15px;
+        }
+
+        /* ABOUT */
+
+        .about-box {
+            max-width: 850px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .about-box h2 {
+            font-size: 34px;
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+
+        .about-box p {
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 2;
+            margin-bottom: 15px;
+        }
+
+        /* CONTACT */
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .contact-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+
+        .contact-card h3 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 19px;
+        }
+
+        .contact-card p {
+            color: var(--muted);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .contact-number {
+            display: block;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 22px;
+        }
+
+        .contact-card .btn {
+            padding: 12px 20px;
+        }
+
+        .review-card {
+            background: var(--primary);
+            color: white;
+        }
+
+        .review-card h3 {
+            color: white;
+        }
+
+        .review-card p {
+            color: #cbd5e1;
+        }
+
+        .review-card .btn {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* FOOTER */
+
+        footer {
+            background: #0b1526;
+            color: #94a3b8;
+            padding: 50px 0 25px;
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 25px;
+            padding-bottom: 35px;
+            border-bottom: 1px solid #253249;
+        }
+
+        .footer-brand h3 {
+            color: white;
+            font-size: 23px;
+            margin-bottom: 7px;
+        }
+
+        .footer-brand p {
+            font-size: 13px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 23px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 25px;
+            font-size: 13px;
+        }
+
+        /* FLOATING WHATSAPP */
+
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #25D366;
+            color: white;
+            padding: 15px 21px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(37,211,102,0.3);
+            z-index: 999;
+            transition: 0.2s;
+        }
+
+        .floating-whatsapp:hover {
+            background: #1ebd59;
+            transform: translateY(-3px);
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+            .nav-links {
+                gap: 12px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .offer-wrapper {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .navbar {
+                min-height: 75px;
+            }
+
+            .brand img {
+                width: 48px;
+                height: 48px;
+            }
+
+            .brand-text h1 {
+                font-size: 18px;
+            }
+
+            .brand-text span {
+                font-size: 11px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 75px 0;
+            }
+
+            .hero h2 {
+                letter-spacing: -0.7px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .offer-card {
+                padding: 25px 20px;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-top {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+            }
+
+            .floating-whatsapp {
+                bottom: 18px;
+                right: 18px;
+                padding: 13px 17px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+
+    <header>
+        <div class="container navbar">
+
+            <a href="#anasayfa" class="brand">
+                <img
+                    src="https://i.imgur.com/JzWYRxb.jpeg"
+                    alt="Doğan Nakliyat Logo"
+                >
+
+                <div class="brand-text">
+                    <h1>DOĞAN NAKLİYAT</h1>
+                    <span>Güvenilir Nakliye Hizmetleri</span>
+                </div>
+            </a>
+
+            <nav class="nav-links" aria-label="Ana menü">
+                <a href="#anasayfa">Ana Sayfa</a>
+                <a href="#hizmetler">Hizmetlerimiz</a>
+                <a href="#teklif">Teklif Al</a>
+                <a href="#hakkimizda">Hakkımızda</a>
+                <a href="#iletisim" class="nav-contact">İletişim</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- HERO -->
+
+    <main>
+
+        <div class="hero" id="anasayfa">
+            <div class="container">
+                <div class="hero-content">
+
+                    <div class="hero-badge">
+                        Şehir İçi & Şehirler Arası Nakliye
+                    </div>
+
+                    <h2>
+                        Yükünüzü Güvenle
+                        <span>Gideceği Yere</span>
+                        Ulaştırıyoruz.
+                    </h2>
+
+                    <p>
+                        Doğan Nakliyat olarak şehir içi ve şehirler arası
+                        nakliye ihtiyaçlarınız için güvenilir, düzenli
+                        ve profesyonel taşımacılık hizmeti sunuyoruz.
+                    </p>
+
+                    <div class="hero-buttons">
+
+                        <a href="#teklif" class="btn btn-green">
+                            Ücretsiz Fiyat Teklifi Al →
+                        </a>
+
+                        <a href="tel:+905399123306" class="btn btn-outline">
+                            ☎ Hemen Ara
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- SERVICES -->
+
+        <section class="section" id="hizmetler">
+            <div class="container">
+
+                <div class="section-header">
+                    <span class="section-label">HİZMETLERİMİZ</span>
+
+                    <h2>Nakliye İhtiyaçlarınız İçin Yanınızdayız</h2>
+
+                    <p>
+                        Taşımacılık ihtiyaçlarınıza uygun,
+                        güvenilir nakliye çözümleri sunuyoruz.
+                    </p>
+                </div>
+
+                <div class="services-grid">
+
+                    <div class="service-card">
+                        <div class="service-icon">🚚</div>
+
+                        <h3>Şehir İçi Nakliye</h3>
+
+                        <p>
+                            Şehir içerisindeki yük ve eşyalarınızın
+                            belirttiğiniz adrese güvenli şekilde
+                            ulaştırılması için nakliye hizmeti.
+                        </p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🛣️</div>
+
+                        <h3>Şehirler Arası Nakliye</h3>
+
+                        <p>
+                            Farklı şehirler arasındaki taşımacılık
+                            ihtiyaçlarınız için güvenilir ve
+                            planlı nakliye hizmeti.
+                        </p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">📦</div>
+
+                        <h3>Yük ve Eşya Taşımacılığı</h3>
+
+                        <p>
+                            Taşınacak yük ve eşyalarınızın
+                            yükleme noktasından teslimat
+                            adresine ulaştırılması.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- OFFER -->
+
+        <section class="section section-white" id="teklif">
+            <div class="container">
+
+                <div class="offer-wrapper">
+
+                    <div class="offer-info">
+
+                        <span class="section-label">
+                            FİYAT TEKLİFİ
+                        </span>
+
+                        <h2>
+                            Nakliye İçin Hızlıca
+                            Fiyat Teklifi Alın
+                        </h2>
+
+                        <p>
+                            Yükleme ve indirme adreslerinizi
+                            girerek WhatsApp üzerinden
+                            bizimle iletişime geçebilirsiniz.
+                        </p>
+
+                        <div class="offer-feature">
+                            <span class="check">✓</span>
+                            Kolay ve hızlı teklif talebi
+                        </div>
+
+                        <div class="offer-feature">
+                            <span class="check">✓</span>
+                            Doğrudan WhatsApp iletişimi
+                        </div>
+
+                        <div class="offer-feature">
+                            <span class="check">✓</span>
+                            Ücretsiz fiyat teklifi
+                        </div>
+
+                    </div>
+
+                    <div class="offer-card">
+
+                        <h3>Fiyat Teklifi Formu</h3>
+
+                        <p>
+                            Aşağıdaki bilgileri doldurarak
+                            teklif talebinizi oluşturun.
+                        </p>
+
+                        <form id="offerForm">
+
+                            <div class="form-group">
+                                <label for="loadingAddress">
+                                    Yükleme Adresi
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="loadingAddress"
+                                    name="loadingAddress"
+                                    placeholder="Yükleme adresini giriniz"
+                                    autocomplete="street-address"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="unloadingAddress">
+                                    İndirme Adresi
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="unloadingAddress"
+                                    name="unloadingAddress"
+                                    placeholder="İndirme adresini giriniz"
+                                    required
+                                >
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="submit-btn"
+                            >
+                                WhatsApp'tan Teklif Al →
+                            </button>
+
+                        </form>
+
+                        <p class="form-note">
+                            Bilgileriniz WhatsApp üzerinden
+                            mesaj olarak iletilir.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ABOUT -->
+
+        <section class="section" id="hakkimizda">
+            <div class="container">
+
+                <div class="about-box">
+
+                    <span class="section-label">
+                        HAKKIMIZDA
+                    </span>
+
+                    <h2>Doğan Nakliyat</h2>
+
+                    <p>
+                        Doğan Nakliyat olarak şehir içi ve
+                        şehirler arası nakliye hizmeti
+                        vermekteyiz.
+                    </p>
+
+                    <p>
+                        Önceliğimiz, müşterilerimizin yük
+                        ve eşyalarının güvenli bir şekilde
+                        taşınması ve belirlenen teslimat
+                        adresine ulaştırılmasıdır.
+                    </p>
+
+                    <p>
+                        Nakliye ihtiyaçlarınız hakkında
+                        bilgi almak ve fiyat teklifi
+                        oluşturmak için bizimle
+                        iletişime geçebilirsiniz.
+                    </p>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+
+        <section class="section section-white" id="iletisim">
+            <div class="container">
+
+                <div class="section-header">
+
+                    <span class="section-label">
+                        İLETİŞİM
+                    </span>
+
+                    <h2>Bizimle İletişime Geçin</h2>
+
+                    <p>
+                        Nakliye hizmetlerimiz hakkında
+                        bilgi almak için bize ulaşabilirsiniz.
+                    </p>
+
+                </div>
+
+                <div class="contact-grid">
+
+                    <div class="contact-card">
+
+                        <h3>Telefon & WhatsApp</h3>
+
+                        <p>
+                            Nakliye talepleriniz ve fiyat
+                            bilgisi için bizimle iletişime geçin.
+                        </p>
+
+                        <a
+                            href="tel:+905399123306"
+                            class="contact-number"
+                        >
+                            0539 912 33 06
+                        </a>
+
+                        <a
+                            href="https://wa.me/905399123306"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-green"
+                        >
+                            WhatsApp'tan Yaz →
+                        </a>
+
+                    </div>
+
+                    <div class="contact-card review-card">
+
+                        <h3>Google'da Bizi Değerlendirin</h3>
+
+                        <p>
+                            Hizmetimizden memnun kaldıysanız
+                            Google üzerinden değerlendirme
+                            yaparak bize destek olabilirsiniz.
+                        </p>
+
+                        <a
+                            href="https://g.page/r/CbJFS-fP_FuxEBM/review"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn"
+                        >
+                            ⭐ Google Yorumu Yap →
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+
+    <footer>
+        <div class="container">
+
+            <div class="footer-top">
+
+                <div class="footer-brand">
+                    <h3>DOĞAN NAKLİYAT</h3>
+
+                    <p>
+                        Şehir İçi ve Şehirler Arası
+                        Güvenilir Nakliye Hizmetleri
+                    </p>
+                </div>
+
+                <div class="footer-links">
+                    <a href="#anasayfa">Ana Sayfa</a>
+                    <a href="#hizmetler">Hizmetlerimiz</a>
+                    <a href="#teklif">Teklif Al</a>
+                    <a href="#hakkimizda">Hakkımızda</a>
+                    <a href="#iletisim">İletişim</a>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                © 2026 Doğan Nakliyat.
+                Tüm Hakları Saklıdır.
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- FLOATING WHATSAPP -->
+
+    <a
+        href="https://wa.me/905399123306"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="floating-whatsapp"
+        aria-label="WhatsApp üzerinden iletişime geç"
+    >
+        WhatsApp İletişim
+    </a>
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+        const offerForm = document.getElementById("offerForm");
+
+        offerForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            sendOffer();
+        });
+
+        function sendOffer() {
+
+            const loading = document
+                .getElementById("loadingAddress")
+                .value
+                .trim();
+
+            const unloading = document
+                .getElementById("unloadingAddress")
+                .value
+                .trim();
+
+            if (!loading || !unloading) {
+                alert("Lütfen yükleme ve indirme adreslerini doldurun.");
+                return;
+            }
+
+            const phone = "905399123306";
+
+            const message =
+                "Merhabalar, Doğan Nakliyat web siteniz üzerinden ulaştım. Fiyat teklifi almak istiyorum.\n\n" +
+                "📍 Yükleme Adresi: " + loading + "\n" +
+                "📍 İndirme Adresi: " + unloading;
+
+            const whatsappURL =
+                "https://wa.me/" +
+                phone +
+                "?text=" +
+                encodeURIComponent(message);
+
+            window.location.href = whatsappURL;
+        }
+    </script>
+
+</body>
+</html>
