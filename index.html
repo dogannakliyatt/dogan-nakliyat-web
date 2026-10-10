@@ -8,7 +8,7 @@
 <meta name="description" content="Doğan Nakliyat, İstanbul Avrupa Yakası merkezli 17 m³ Fiat Ducato ile Türkiye'nin 81 iline nakliye hizmeti. WhatsApp üzerinden fiyat teklifi alın.">
 <meta name="robots" content="index, follow">
 
-<!-- GOOGLE SEARCH CONSOLE DOGRULAMA -->
+<!-- GOOGLE SEARCH CONSOLE -->
 <meta name="google-site-verification" content="XV7b-HZWfQI86Mt8euE2RvXbocWxGZesf57ToczsgKw">
 
 <title>Doğan Nakliyat | Şehir İçi ve Şehirler Arası Nakliye</title>
@@ -683,6 +683,27 @@ header {
     margin-top: 15px;
 }
 
+/* REVIEW BUTTON */
+
+.review-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 13px 20px;
+    background: var(--green);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 800;
+    transition: .25s;
+}
+
+.review-button:hover {
+    background: #12833b;
+    transform: translateY(-3px);
+}
+
 /* FOOTER */
 
 footer {
@@ -736,39 +757,28 @@ footer {
     box-shadow: 0 8px 25px rgba(0,0,0,.2);
 }
 
-/* YUKARI CIK BUTONU */
+/* BACK TO TOP */
 
 .back-top {
     position: fixed;
     left: 20px;
     bottom: 20px;
     z-index: 900;
-
     width: 55px;
     height: 55px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     padding: 0;
     line-height: 0;
-
     border: none;
     border-radius: 50%;
-
     background: var(--navy2);
     color: white;
-
     box-shadow: 0 8px 25px rgba(0,0,0,.2);
-
     opacity: 0;
     pointer-events: none;
-
-    transition:
-        opacity .25s,
-        background .25s,
-        transform .25s;
+    transition: opacity .25s, background .25s, transform .25s;
 }
 
 .back-top svg {
@@ -788,7 +798,7 @@ footer {
     transform: translateY(-3px);
 }
 
-/* IMAGE LIGHTBOX */
+/* LIGHTBOX */
 
 .lightbox {
     border: none;
@@ -828,9 +838,7 @@ footer {
 .js .reveal {
     opacity: 0;
     transform: translateY(45px) scale(.96);
-    transition:
-        opacity .8s ease,
-        transform .8s cubic-bezier(.2,.7,.2,1);
+    transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1);
 }
 
 .js .reveal.from-left {
@@ -1215,22 +1223,12 @@ footer {
 
                 <div class="form-group">
                     <label for="loadingAddress">Yükleme Adresi</label>
-                    <input
-                        type="text"
-                        id="loadingAddress"
-                        placeholder="Yükleme adresini giriniz"
-                        required
-                    >
+                    <input type="text" id="loadingAddress" placeholder="Yükleme adresini giriniz" required>
                 </div>
 
                 <div class="form-group">
                     <label for="unloadingAddress">İndirme Adresi</label>
-                    <input
-                        type="text"
-                        id="unloadingAddress"
-                        placeholder="İndirme adresini giriniz"
-                        required
-                    >
+                    <input type="text" id="unloadingAddress" placeholder="İndirme adresini giriniz" required>
                 </div>
 
                 <button type="submit" class="submit-button">
@@ -1542,6 +1540,19 @@ footer {
                 >
                     E-posta Gönder →
                 </a>
+
+                <!-- YENI: GOOGLE DEGERLENDIRME BUTONU -->
+                <div>
+                    <a
+                        href="https://g.page/r/CbJFS-fP_FuxEBM/review"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="review-button"
+                    >
+                        ⭐ Bizi Değerlendirin
+                    </a>
+                </div>
+
             </div>
 
         </div>
@@ -1591,8 +1602,6 @@ footer {
     ✆ WhatsApp
 </a>
 
-<!-- YUKARI CIK BUTONU -->
-
 <button
     class="back-top"
     id="backTop"
@@ -1621,11 +1630,13 @@ footer {
     <img id="lightboxImg" alt="Büyütülmüş araç fotoğrafı">
 </dialog>
 
+<!-- JAVASCRIPT -->
+
 <script>
 (function () {
     "use strict";
 
-    /* SAYFA ACILISINDA EN USTE DON */
+    /* SITE ACILISINDA EN USTE DON */
 
     if ("scrollRestoration" in history) {
         history.scrollRestoration = "manual";
@@ -1634,20 +1645,19 @@ footer {
     function resetInitialScroll() {
         if (window.location.hash) return;
 
-        window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: "instant"
+        const root = document.documentElement;
+        const previousBehavior = root.style.scrollBehavior;
+
+        root.style.scrollBehavior = "auto";
+        window.scrollTo(0, 0);
+
+        requestAnimationFrame(function () {
+            root.style.scrollBehavior = previousBehavior;
         });
     }
 
-    window.addEventListener("pageshow", function () {
-        resetInitialScroll();
-    });
-
-    window.addEventListener("load", function () {
-        resetInitialScroll();
-    });
+    window.addEventListener("pageshow", resetInitialScroll);
+    window.addEventListener("load", resetInitialScroll);
 
     /* MOBILE MENU */
 
