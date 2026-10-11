@@ -10,6 +10,7 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
+  "r2_buckets": [{"binding":"MEDIA_BUCKET","bucket_name":"dogan-nakliyat-media"}],
   "d1_databases": [
     {
       "binding": "SITE_DB",
