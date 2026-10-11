@@ -2123,8 +2123,8 @@ footer {
         "Merhaba, Doğan Nakliyat web siteniz üzerinden fiyat teklifi almak istiyorum.\n\n" +
         "📍 Yükleme Adresi: " + loading + "\n" +
         "📍 İndirme Adresi: " + unloading + "\n" +
-        "📅 Nakliye Tarihi: " + formattedDate + "\\n" +
-        "👤 İsim: " + customerName + "\\n" +
+        "📅 Nakliye Tarihi: " + formattedDate + "\n" +
+        "👤 İsim: " + customerName + "\n" +
         "☎ İletişim: " + customerPhone;
 
       try{await fetch("/api/site/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({loading,unloading,date:dateValue,name:customerName,contact:customerPhone})})}catch(_){}
