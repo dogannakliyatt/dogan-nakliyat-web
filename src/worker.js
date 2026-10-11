@@ -38,6 +38,7 @@ async function login(request,env){
  const token=randomToken(),digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));
  const expiry=Date.now()+8*60*60*1000;
  await env.SITE_DB.prepare("INSERT INTO admin_sessions(token_hash,expires_at) VALUES(?,?)").bind(digest,expiry).run();
+ await audit(env,"admin.login","success");
  return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","cache-control":"no-store","set-cookie":"dn_session="+token+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800"}});
 }
 
@@ -61,7 +62,7 @@ const audit=async(env,action,target="")=>{try{await env.SITE_DB.prepare("INSERT 
 const validOrigin=(request,url)=>request.headers.get("origin")===url.origin;
 const allowedImageType={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"};
 async function galleryList(env){const rows=await env.SITE_DB.prepare("SELECT id,title,sort_order,created_at FROM gallery_items ORDER BY sort_order ASC,created_at DESC LIMIT 150").all();return rows.results.map(r=>({...r,url:"/api/site/image/"+encodeURIComponent(r.id)}))}
-export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(env).catch(e=>console.error("Google review sync:",e.message)))},async fetch(request,env){
+export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env.SITE_DB.prepare("DELETE FROM quote_rate_limits WHERE window_expires<?").bind(Date.now()-3600000).run().catch(()=>{}))}if(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET&&env.GOOGLE_REFRESH_TOKEN&&env.GOOGLE_BUSINESS_LOCATION){ctx.waitUntil(syncGoogleReviews(env).catch(e=>console.error("Google review sync:",e.message)))}},async fetch(request,env){
  const url=new URL(request.url);
  if (/^\/(?:src|migrations)(?:\/|$)/i.test(url.pathname) || /^\/(?:wrangler\.jsonc|ADMIN_SETUP\.md|\.git(?:\/|$))/i.test(url.pathname)) return json({error:"Not found"},404);
  if(request.method!=="GET"&&request.method!=="HEAD"&&!url.pathname.startsWith("/api/admin/")&&url.pathname!=="/api/site/quote") return json({error:"Method not allowed"},405);
@@ -177,6 +178,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
     if(["logoUrl","bannerUrl"].includes(body.key)&&value){try{const u=new URL(value,url.origin);if(u.protocol!=="https:"||u.username||u.password||u.origin!==url.origin)return json({error:"Görsel/bağlantı aynı site altında HTTPS olmalı"},400)}catch{return json({error:"Geçersiz URL"},400)}}
     if(body.key==="reviewUrl"&&value){try{const u=new URL(value);if(u.protocol!=="https:"||u.username||u.password)return json({error:"HTTPS bağlantısı gerekli"},400)}catch{return json({error:"Geçersiz URL"},400)}}
     await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind("content:"+body.key,JSON.stringify(value)).run();
+    await audit(env,"content.update",body.key);
     return json({ok:true});
    }
    return json({error:"Yöntem desteklenmiyor"},405);
@@ -193,6 +195,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
     if(!body||!allowed.includes(body.section)||!["title","description"].includes(body.field)||typeof body.value!=="string"||body.value.length>1500)return json({error:"Geçersiz içerik"},400);
     const key="section:"+body.section+":"+body.field;
     await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(key,JSON.stringify(body.value)).run();
+    await audit(env,"section.update",key);
     return json({ok:true});
    }
    return json({error:"Yöntem desteklenmiyor"},405);
@@ -208,6 +211,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
     const [key,value]=Object.entries(data)[0];
     if(!["heroTitle","heroSubtitle","phone","whatsapp","serviceDescription"].includes(key)||typeof value!=="string"||value.length>2000)return json({error:"Geçersiz alan"},400);
     await env.SITE_DB.prepare("INSERT INTO site_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(key,JSON.stringify(value)).run();
+    await audit(env,"settings.update",key);
     return json({ok:true});
    }
    return json({error:"Yöntem desteklenmiyor"},405);
