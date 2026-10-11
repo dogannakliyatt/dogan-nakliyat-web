@@ -164,7 +164,7 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   }
   if(url.pathname==="/api/admin/content"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
-   const keys=["businessName","phone","whatsapp","email","address","hours","seoTitle","seoDescription","primaryColor","accentColor","logoUrl","bannerUrl","reviewUrl","googlePlaceId","footerText","hideReviews","hideGallery","showOfferForm"];
+   const keys=["businessName","phone","whatsapp","email","address","hours","seoTitle","seoDescription","primaryColor","accentColor","logoUrl","bannerUrl","reviewUrl","footerText","hideReviews","hideGallery","showOfferForm"];
    if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'content:%'").all();return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])))}
    if(request.method==="PUT"){
     if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);
