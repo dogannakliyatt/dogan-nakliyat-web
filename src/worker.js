@@ -52,6 +52,27 @@ export default {async fetch(request,env){
  if(url.pathname==="/api/admin/logout"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);if(request.method!=="POST")return json({error:"Method not allowed"},405);const token=cookie(request);if(token&&env.SITE_DB){const digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));await env.SITE_DB.prepare("DELETE FROM admin_sessions WHERE token_hash=?").bind(digest).run()}return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","set-cookie":"dn_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"}})}
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
   if(!(await authorized(request,env)))return json({error:"Yönetici girişi gerekli."},403);
+  if(url.pathname==="/api/admin/content"){
+   if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   const keys=["businessName","phone","whatsapp","email","address","hours","seoTitle","seoDescription","primaryColor","accentColor","logoUrl","bannerUrl","reviewUrl","googlePlaceId","footerText","googleReviewsStatus","hideReviews","hideGallery","showOfferForm"];
+   if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'content:%'").all();return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])))}
+   if(request.method==="PUT"){
+    if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);
+    if(request.headers.get("content-type")?.split(";")[0]!=="application/json")return json({error:"JSON gerekli"},415);
+    if(Number(request.headers.get("content-length")||0)>8192)return json({error:"İstek çok büyük"},413);
+    let body;try{body=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
+    if(!body||!keys.includes(body.key)||typeof body.value!=="string"||body.value.length>2000)return json({error:"Geçersiz değer"},400);
+    const value=body.value.trim();
+    if(["phone","whatsapp"].includes(body.key)&&value&&!/^\\+?[0-9 ()-]{7,24}$/.test(value))return json({error:"Geçersiz telefon"},400);
+    if(body.key==="email"&&value&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))return json({error:"Geçersiz e-posta"},400);
+    if(["primaryColor","accentColor"].includes(body.key)&&value&&!/^#[0-9a-fA-F]{6}$/.test(value))return json({error:"Renk #RRGGBB biçiminde olmalı"},400);
+    if(["hideReviews","hideGallery","showOfferForm"].includes(body.key)&&!["true","false",""].includes(value))return json({error:"true veya false kullanın"},400);
+    if(["logoUrl","bannerUrl","reviewUrl"].includes(body.key)&&value){try{const u=new URL(value,url.origin);if(u.protocol!=="https:"||u.username||u.password||u.origin!==url.origin)return json({error:"Görsel/bağlantı aynı site altında HTTPS olmalı"},400)}catch{return json({error:"Geçersiz URL"},400)}}
+    await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind("content:"+body.key,JSON.stringify(value)).run();
+    return json({ok:true});
+   }
+   return json({error:"Yöntem desteklenmiyor"},405);
+  }
   if(url.pathname==="/api/admin/sections"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
    if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'section:%'").all();return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])))}
@@ -85,6 +106,11 @@ export default {async fetch(request,env){
   }
   if(url.pathname==="/admin"||url.pathname==="/admin/")return env.ASSETS.fetch(new Request(new URL("/admin/index.html",url),request));
   return env.ASSETS.fetch(request);
+ }
+ if(url.pathname==="/api/site/content"){
+  if(!env.SITE_DB)return json({});
+  const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'content:%'").all();
+  return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])));
  }
  if(url.pathname==="/api/site/sections"){
   if(!env.SITE_DB)return json({});
