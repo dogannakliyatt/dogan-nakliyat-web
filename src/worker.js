@@ -48,6 +48,10 @@ export default {async fetch(request,env){
   // Serve HTML as an in-memory response to avoid the static-assets canonical redirect loop.
   return new Response(ADMIN_HTML,{status:200,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","x-frame-options":"DENY"}});
  }
+ if(url.pathname==="/api/admin/status"){
+  if(request.method!=="GET")return json({error:"Method not allowed"},405);
+  return json({authenticated:await authorized(request,env)});
+ }
  if(url.pathname==="/api/admin/login"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);return login(request,env)}
  if(url.pathname==="/api/admin/logout"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);if(request.method!=="POST")return json({error:"Method not allowed"},405);const token=cookie(request);if(token&&env.SITE_DB){const digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));await env.SITE_DB.prepare("DELETE FROM admin_sessions WHERE token_hash=?").bind(digest).run()}return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","set-cookie":"dn_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"}})}
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
@@ -108,6 +112,7 @@ export default {async fetch(request,env){
   if(url.pathname==="/admin"||url.pathname==="/admin/")return env.ASSETS.fetch(new Request(new URL("/admin/index.html",url),request));
   return env.ASSETS.fetch(request);
  }
+ if(url.pathname==="/api/site/health")return json({ok:true});
  if(url.pathname==="/api/site/content"){
   if(!env.SITE_DB)return json({});
   const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'content:%'").all();
