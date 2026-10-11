@@ -101,7 +101,9 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
    if(!b||!allowed.includes(b.key)||!Array.isArray(b.items)||b.items.length>24)return json({error:"Geçersiz liste"},400);
    const clean=[];for(const x of b.items){
     if(!x||typeof x.title!=="string"||typeof x.description!=="string"||typeof x.icon!=="string"||x.title.length>160||x.description.length>1000||x.icon.length>12)return json({error:"Geçersiz kart bilgisi"},400);
-    clean.push({title:x.title.trim(),description:x.description.trim(),icon:x.icon.trim()});
+    const href=typeof x.href==="string"?x.href.trim():"";
+    if(b.key==="routes"&&!/^(?:#teklif|guzergahlar\/[a-z0-9-]+\.html)$/.test(href))return json({error:"Güzergâh bağlantısı hatalı"},400);
+    clean.push({title:x.title.trim(),description:x.description.trim(),icon:x.icon.trim(),href:b.key==="routes"?href:""});
    }
    await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind("blocks:"+b.key,JSON.stringify(clean)).run();
    await audit(env,"blocks.update",b.key);return json({ok:true});
