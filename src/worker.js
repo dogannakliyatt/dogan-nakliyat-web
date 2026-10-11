@@ -213,8 +213,15 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
   let b;try{b=await request.json()}catch{return json({error:"Geçersiz istek"},400)}
   for(const k of ["loading","unloading","date"])if(typeof b?.[k]!=="string"||!b[k].trim()||b[k].length>300)return json({error:"Geçersiz alan"},400);
   if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(b.date)||Number.isNaN(Date.parse(b.date)))return json({error:"Geçersiz tarih"},400);
+  const name=String(b.name||"").trim(),contact=String(b.contact||"").trim();
+  if(!name||name.length>100||!contact||contact.length>30||!/^[+0-9 ()-]{7,30}$/.test(contact))return json({error:"Ad ve geçerli iletişim numarası gerekli"},400);
+  const ip=request.headers.get("cf-connecting-ip")||"unknown";
+  const key=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ip))));
+  const now=Date.now();
+  const limit=await env.SITE_DB.prepare("INSERT INTO quote_rate_limits(client_key,attempts,window_expires) VALUES(?,1,?) ON CONFLICT(client_key) DO UPDATE SET attempts=CASE WHEN window_expires<? THEN 1 ELSE attempts+1 END,window_expires=CASE WHEN window_expires<? THEN excluded.window_expires ELSE window_expires END RETURNING attempts").bind(key,now+3600000,now,now).first();
+  if(limit.attempts>3)return json({error:"Saatlik teklif talebi sınırına ulaşıldı"},429);
   const created=Date.now(),id=uuid();
-  await env.SITE_DB.prepare("INSERT INTO quote_requests(id,loading_address,unloading_address,moving_date,customer_name,customer_contact,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(id,b.loading.trim(),b.unloading.trim(),b.date,String(b.name||"").slice(0,100),String(b.contact||"").slice(0,100),"new",created).run();
+  await env.SITE_DB.prepare("INSERT INTO quote_requests(id,loading_address,unloading_address,moving_date,customer_name,customer_contact,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(id,b.loading.trim(),b.unloading.trim(),b.date,name,contact,"new",created).run();
   return json({ok:true,id});
  }
  if(url.pathname==="/api/site/reviews"){
