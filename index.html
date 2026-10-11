@@ -2258,5 +2258,21 @@ footer {
 })();
 </script>
 
+<script>
+/* Yönetim panelinden gelen yayınlanmış içerikleri güvenli biçimde uygula. */
+(async function () {
+  try {
+    const response = await fetch("api/site/settings", {cache:"no-store"});
+    if (!response.ok) return;
+    const data = await response.json();
+    const title = document.querySelector(".hero h1");
+    const subtitle = document.querySelector(".hero p");
+    if (title && typeof data.heroTitle === "string" && data.heroTitle.trim()) title.textContent = data.heroTitle;
+    if (subtitle && typeof data.heroSubtitle === "string" && data.heroSubtitle.trim()) subtitle.textContent = data.heroSubtitle;
+    const about = document.querySelector("#hakkimizda p");
+    if (about && typeof data.serviceDescription === "string" && data.serviceDescription.trim()) about.textContent = data.serviceDescription;
+  } catch (_) {}
+})();
+</script>
 </body>
 </html>

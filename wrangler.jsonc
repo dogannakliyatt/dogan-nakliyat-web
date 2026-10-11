@@ -1,10 +1,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dogan-nakliyat-web",
+  "main": "src/worker.js",
   "compatibility_date": "2026-10-11",
   "assets": {
     "directory": "./",
+    "binding": "ASSETS",
+    "run_worker_first": true,
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "SITE_DB",
+      "database_name": "dogan-nakliyat-db",
+      "database_id": "0c75620e-a074-4c55-a9d9-37914ef0e1c5"
+    }
+  ]
 }
