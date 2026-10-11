@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://dogannakliyatt.github.io/dogan-nakliyat-web/</loc>
-  </url>
+  <url><loc>https://dogannakliyatt.github.io/dogan-nakliyat-web/</loc></url>
+  <url><loc>https://dogannakliyatt.github.io/dogan-nakliyat-web/guzergahlar/istanbul-ankara.html</loc></url>
+  <url><loc>https://dogannakliyatt.github.io/dogan-nakliyat-web/guzergahlar/istanbul-izmir.html</loc></url>
+  <url><loc>https://dogannakliyatt.github.io/dogan-nakliyat-web/guzergahlar/istanbul-antalya.html</loc></url>
+  <url><loc>https://dogannakliyatt.github.io/dogan-nakliyat-web/guzergahlar/istanbul-bursa.html</loc></url>
 </urlset>
