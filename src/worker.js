@@ -41,12 +41,27 @@ async function login(request,env){
  return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","cache-control":"no-store","set-cookie":"dn_session="+token+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800"}});
 }
 
+async function syncGoogleReviews(env){
+ const {GOOGLE_CLIENT_ID:id,GOOGLE_CLIENT_SECRET:secret,GOOGLE_REFRESH_TOKEN:refresh,GOOGLE_BUSINESS_LOCATION:location}=env;
+ if(!id||!secret||!refresh||!/^accounts\\/[^/]+\\/locations\\/[^/]+$/.test(location||"")||!env.SITE_DB)throw Error("Google Business Profile OAuth yapılandırılmadı");
+ const form=new URLSearchParams({client_id:id,client_secret:secret,refresh_token:refresh,grant_type:"refresh_token"});
+ const tokenRes=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});
+ if(!tokenRes.ok)throw Error("Google OAuth token alınamadı");
+ const token=(await tokenRes.json()).access_token;if(!token)throw Error("Google token eksik");
+ const response=await fetch("https://mybusiness.googleapis.com/v4/"+location+"/reviews?pageSize=50&orderBy=updateTime%20desc",{headers:{"authorization":"Bearer "+token}});
+ if(!response.ok)throw Error("Google yorum API hatası HTTP "+response.status);
+ const result=await response.json();const scores={ONE:1,TWO:2,THREE:3,FOUR:4,FIVE:5};
+ const items=(result.reviews||[]).slice(0,50).map(r=>({id:String(r.reviewId||"").slice(0,100),author:String(r.reviewer?.displayName||"Google kullanıcısı").slice(0,120),rating:scores[r.starRating]||0,comment:String(r.comment||"").slice(0,1200),updated:String(r.updateTime||"")})).filter(r=>r.rating>=1);
+ const saved={source:"google",items,averageRating:Number(result.averageRating||0),totalReviewCount:Number(result.totalReviewCount||0),syncedAt:Date.now()};
+ await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind("google:cachedReviews",JSON.stringify(saved)).run();
+ await audit(env,"google.reviews.sync",String(items.length));return saved;
+}
 const uuid=()=>crypto.randomUUID();
 const audit=async(env,action,target="")=>{try{await env.SITE_DB.prepare("INSERT INTO admin_audit(id,action,target,created_at) VALUES(?,?,?,?)").bind(uuid(),action,target,Date.now()).run()}catch(_){}};
 const validOrigin=(request,url)=>request.headers.get("origin")===url.origin;
 const allowedImageType={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"};
 async function galleryList(env){const rows=await env.SITE_DB.prepare("SELECT id,title,sort_order,created_at FROM gallery_items ORDER BY sort_order ASC,created_at DESC LIMIT 150").all();return rows.results.map(r=>({...r,url:"/api/site/image/"+encodeURIComponent(r.id)}))}
-export default {async fetch(request,env){
+export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(env).catch(e=>console.error("Google review sync:",e.message)))},async fetch(request,env){
  const url=new URL(request.url);
  if (/^\/(?:src|migrations)(?:\/|$)/i.test(url.pathname) || /^\/(?:wrangler\.jsonc|ADMIN_SETUP\.md|\.git(?:\/|$))/i.test(url.pathname)) return json({error:"Not found"},404);
  if(request.method!=="GET"&&request.method!=="HEAD"&&!url.pathname.startsWith("/api/admin/")&&url.pathname!=="/api/site/quote") return json({error:"Method not allowed"},405);
@@ -69,6 +84,11 @@ export default {async fetch(request,env){
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
   if(!(await authorized(request,env)))return json({error:"Yönetici girişi gerekli."},403);
 
+  if(url.pathname==="/api/admin/google-reviews/sync"){
+   if(request.method!=="POST")return json({error:"Yöntem desteklenmiyor"},405);
+   if(!validOrigin(request,url))return json({error:"Origin rejected"},403);
+   try{const saved=await syncGoogleReviews(env);return json(saved)}catch(e){return json({error:String(e.message||"Senkronizasyon başarısız").slice(0,200)},503)}
+  }
   if(url.pathname==="/api/admin/gallery"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
    if(request.method==="GET")return json(await galleryList(env));
