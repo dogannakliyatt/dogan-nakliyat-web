@@ -1365,6 +1365,15 @@ footer {
       <form id="offerForm">
 
         <div class="form-group">
+          <label for="customerName">Adınız</label>
+          <input type="text" id="customerName" name="customerName" maxlength="100" autocomplete="name" placeholder="Adınız" required>
+        </div>
+        <div class="form-group">
+          <label for="customerPhone">İletişim numaranız</label>
+          <input type="tel" id="customerPhone" name="customerPhone" maxlength="30" autocomplete="tel" placeholder="Telefon numaranız" required>
+        </div>
+
+        <div class="form-group">
           <label for="loadingAddress">Yükleme Adresi</label>
           <input
             type="text"
@@ -1399,6 +1408,7 @@ footer {
 
       </form>
 
+      <p class="form-note">Ad ve telefon bilgileriniz teklif talebinizi yanıtlamak için güvenli yönetim panelimizde saklanır.</p>
       <p class="form-note">
         Bilgileriniz WhatsApp'ta hazır mesaj olarak açılır.
         Göndermek için mesajı onaylamanız gerekir.
@@ -2090,6 +2100,9 @@ footer {
         .value
         .trim();
 
+      const customerName = document.getElementById("customerName").value.trim();
+      const customerPhone = document.getElementById("customerPhone").value.trim();
+      if (!customerName || !customerPhone) {alert("Ad ve iletişim numarası gerekli.");return;}
       const dateValue = movingDate.value;
 
       if (!loading || !unloading || !dateValue) {
@@ -2110,9 +2123,11 @@ footer {
         "Merhaba, Doğan Nakliyat web siteniz üzerinden fiyat teklifi almak istiyorum.\n\n" +
         "📍 Yükleme Adresi: " + loading + "\n" +
         "📍 İndirme Adresi: " + unloading + "\n" +
-        "📅 Nakliye Tarihi: " + formattedDate;
+        "📅 Nakliye Tarihi: " + formattedDate + "\\n" +
+        "👤 İsim: " + customerName + "\\n" +
+        "☎ İletişim: " + customerPhone;
 
-      try{await fetch("/api/site/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({loading,unloading,date:dateValue})})}catch(_){}
+      try{await fetch("/api/site/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({loading,unloading,date:dateValue,name:customerName,contact:customerPhone})})}catch(_){}
       const actualWhats=(window.dnWhatsNumber||"905399123306");
       const url =
         "https://wa.me/"+actualWhats+"?text=" +
