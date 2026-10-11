@@ -2116,8 +2116,9 @@ footer {
         "📍 İndirme Adresi: " + unloading + "\n" +
         "📅 Nakliye Tarihi: " + formattedDate;
 
+      const actualWhats=(window.dnWhatsNumber||"905399123306");
       const url =
-        "https://wa.me/905399123306?text=" +
+        "https://wa.me/"+actualWhats+"?text=" +
         encodeURIComponent(message);
 
       window.location.href = url;
@@ -2259,6 +2260,24 @@ footer {
 </script>
 
 <script>
+/* D1 üzerindeki bölüm başlıkları ve açıklamaları; HTML değil düz metin uygulanır. */
+(async function(){
+ try {
+  const response=await fetch("api/site/sections",{cache:"no-store"});
+  if(!response.ok)return;
+  const settings=await response.json();
+  const sections=["anasayfa","hizmetler","aracimiz","bolgeler","nedenbiz","guzergahlar","tasima-ornekleri","turkiye-haritasi","yorumlar","sss","hakkimizda","iletisim"];
+  for(const id of sections){
+   const section=document.getElementById(id);if(!section)continue;
+   const title=settings[id+":title"];
+   const desc=settings[id+":description"];
+   const titleNode=section.querySelector(id==="anasayfa"?"h1":".section-header h2");
+   const descriptionNode=section.querySelector(id==="anasayfa"?".hero-content p":".section-header p");
+   if(titleNode&&typeof title==="string"&&title.trim())titleNode.textContent=title;
+   if(descriptionNode&&typeof desc==="string"&&desc.trim())descriptionNode.textContent=desc;
+  }
+ }catch(_){}
+})();
 /* Yönetim panelinden gelen yayınlanmış içerikleri güvenli biçimde uygula. */
 (async function () {
   try {
@@ -2272,6 +2291,36 @@ footer {
     const about = document.querySelector("#hakkimizda p");
     if (about && typeof data.serviceDescription === "string" && data.serviceDescription.trim()) about.textContent = data.serviceDescription;
   } catch (_) {}
+})();
+</script>
+
+<script>
+/* Sunucudan doğrulanan marka, iletişim, tasarım ve SEO ayarları. */
+(async function(){
+ try{
+  const response=await fetch("api/site/content",{cache:"no-store"});if(!response.ok)return;
+  const c=await response.json();
+  const cleanPhone=s=>String(s||"").replace(/[^0-9+]/g,"");
+  const phone=cleanPhone(c.phone),whats=cleanPhone(c.whatsapp).replace(/^\+/,"");
+  if(phone){document.querySelectorAll('a[href^="tel:"]').forEach(a=>{a.href="tel:"+phone;if(a.classList.contains("contact-link"))a.textContent=c.phone})}
+  if(whats){window.dnWhatsNumber=whats;document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>{const url=new URL(a.href);const query=url.search;a.href="https://wa.me/"+whats+query})}
+  if(c.email){document.querySelectorAll('a[href^="mailto:"]').forEach(a=>{a.href="mailto:"+c.email;if(a.classList.contains("contact-link"))a.textContent=c.email})}
+  if(c.businessName){const brand=document.querySelector(".brand");if(brand){const name=brand.querySelector("strong");if(name)name.textContent=c.businessName}const foot=document.querySelector("footer strong");if(foot)foot.textContent=c.businessName}
+  if(c.seoTitle){document.title=c.seoTitle;const meta=document.querySelector('meta[property="og:title"]');if(meta)meta.content=c.seoTitle}
+  if(c.seoDescription){const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=c.seoDescription;const og=document.querySelector('meta[property="og:description"]');if(og)og.content=c.seoDescription}
+  for(const [key,css] of [["primaryColor","--navy"],["accentColor","--green"]])if(/^#[0-9a-fA-F]{6}$/.test(c[key]||""))document.documentElement.style.setProperty(css,c[key]);
+  if(c.reviewUrl){try{const u=new URL(c.reviewUrl);if(u.protocol==="https:"){document.querySelectorAll('a.review-button').forEach(a=>{a.href=u.href})}}catch(_){}}
+  if(c.hours){const contact=document.querySelector("#iletisim .contact-card:first-child");if(contact&&!contact.querySelector(".hours-note")){const p=document.createElement("p");p.className="hours-note";p.textContent="Çalışma saatleri: "+c.hours;contact.append(p)}}
+
+  if(c.footerText){const foot=document.querySelector(".footer-bottom");if(foot)foot.textContent=c.footerText}
+  if(c.address){const contact=document.querySelector("#iletisim .contact-card:nth-child(2) p");if(contact)contact.textContent=c.address}
+  if(c.hideReviews==="true"){const reviews=document.getElementById("yorumlar");if(reviews)reviews.hidden=true}
+  if(c.hideGallery==="true"){const gallery=document.querySelector("#aracimiz .gallery");if(gallery)gallery.hidden=true}
+  if(c.showOfferForm==="false"){const form=document.querySelector("#offerForm");if(form)form.closest(".form-card").hidden=true}
+  for(const [key,selector] of [["logoUrl",".brand img"],["bannerUrl",".hero img"]]){
+   if(!c[key])continue;try{const u=new URL(c[key],location.origin);if(u.origin===location.origin&&u.protocol==="https:"){const img=document.querySelector(selector);if(img)img.src=u.href}}catch(_){}
+  }
+ }catch(_){}
 })();
 </script>
 </body>
