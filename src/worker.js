@@ -17,6 +17,8 @@ async function authorized(request,env){
 }
 export default {async fetch(request,env){
  const url=new URL(request.url);
+ if (/^\/(?:src|migrations)(?:\/|$)/i.test(url.pathname) || /^\/(?:wrangler\.jsonc|ADMIN_SETUP\.md|\.git(?:\/|$))/i.test(url.pathname)) return json({error:"Not found"},404);
+ if(request.method!=="GET"&&request.method!=="HEAD"&&!url.pathname.startsWith("/api/admin/")) return json({error:"Method not allowed"},405);
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
   if(!(await authorized(request,env)))return json({error:"Yönetici erişimi yetkilendirilmedi. Cloudflare Access yapılandırılmalıdır."},403);
   if(url.pathname==="/api/admin/settings"){
