@@ -111,6 +111,7 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   }
   if(url.pathname==="/api/admin/gallery"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   if(!env.MEDIA_BUCKET&&request.method!=="GET")return json({error:"Fotoğraf depolaması henüz kurulmadı"},503);
    if(request.method==="GET")return json(await galleryList(env));
    if(!validOrigin(request,url))return json({error:"Origin rejected"},403);
    if(request.method==="POST"){
@@ -267,6 +268,11 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   const row=await env.SITE_DB.prepare("SELECT value FROM site_settings WHERE key='google:cachedReviews'").bind().first();
   if(!row)return json({items:[],source:"none"});
   try{return json(JSON.parse(row.value))}catch{return json({items:[],source:"none"})}
+ }
+ if(url.pathname==="/api/site/setup-status"){
+  const checks={database:!!env.SITE_DB,media:!!env.MEDIA_BUCKET,google:!!(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET&&env.GOOGLE_REFRESH_TOKEN&&env.GOOGLE_BUSINESS_LOCATION)};
+  if(env.SITE_DB){try{await env.SITE_DB.prepare("SELECT id FROM quote_requests LIMIT 1").all();checks.quotes=true}catch{checks.quotes=false}try{await env.SITE_DB.prepare("SELECT id FROM gallery_items LIMIT 1").all();checks.gallery=true}catch{checks.gallery=false}}
+  return json(checks);
  }
  if(url.pathname==="/api/site/health")return json({ok:true});
  if(url.pathname==="/api/site/content"){
