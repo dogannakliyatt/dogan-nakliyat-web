@@ -230,8 +230,8 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(7),JSON.parse(r.value)])));
  }
  if(url.pathname==="/api/site/gallery"){
-  if(!env.SITE_DB)return json([]);
-  return json(await galleryList(env));
+  if(!env.SITE_DB||!env.MEDIA_BUCKET)return json([]);
+  try{return json(await galleryList(env))}catch{return json([])}
  }
  if(url.pathname.startsWith("/api/site/image/")){
   if(!env.SITE_DB||!env.MEDIA_BUCKET)return json({error:"Görsel depolama yapılandırılmadı"},503);
