@@ -89,6 +89,23 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
    if(!validOrigin(request,url))return json({error:"Origin rejected"},403);
    try{const saved=await syncGoogleReviews(env);return json(saved)}catch(e){return json({error:String(e.message||"Senkronizasyon başarısız").slice(0,200)},503)}
   }
+
+  if(url.pathname==="/api/admin/blocks"){
+   if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   const allowed=["services","reasons","faq","routes"];
+   if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'blocks:%'").all();return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(7),JSON.parse(r.value)])))}
+   if(request.method!=="PUT"||!validOrigin(request,url))return json({error:"İstek reddedildi"},403);
+   if(request.headers.get("content-type")?.split(";")[0]!=="application/json")return json({error:"JSON gerekli"},415);
+   if(Number(request.headers.get("content-length")||0)>20000)return json({error:"İstek çok büyük"},413);
+   let b;try{b=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
+   if(!b||!allowed.includes(b.key)||!Array.isArray(b.items)||b.items.length>24)return json({error:"Geçersiz liste"},400);
+   const clean=[];for(const x of b.items){
+    if(!x||typeof x.title!=="string"||typeof x.description!=="string"||typeof x.icon!=="string"||x.title.length>160||x.description.length>1000||x.icon.length>12)return json({error:"Geçersiz kart bilgisi"},400);
+    clean.push({title:x.title.trim(),description:x.description.trim(),icon:x.icon.trim()});
+   }
+   await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind("blocks:"+b.key,JSON.stringify(clean)).run();
+   await audit(env,"blocks.update",b.key);return json({ok:true});
+  }
   if(url.pathname==="/api/admin/gallery"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
    if(request.method==="GET")return json(await galleryList(env));
@@ -190,6 +207,12 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
   return env.ASSETS.fetch(request);
  }
 
+
+ if(url.pathname==="/api/site/blocks"){
+  if(!env.SITE_DB)return json({});
+  const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'blocks:%'").all();
+  return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(7),JSON.parse(r.value)])));
+ }
  if(url.pathname==="/api/site/gallery"){
   if(!env.SITE_DB)return json([]);
   return json(await galleryList(env));
