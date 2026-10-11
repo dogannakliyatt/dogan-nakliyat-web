@@ -2389,5 +2389,37 @@ footer {
  }catch(_){}
 })();
 </script>
+<script>
+/* Panel listesiyle düzenlenen hizmet, neden biz, güzergâh ve SSS içerikleri */
+(async function(){
+ try{
+  const response=await fetch("/api/site/blocks",{cache:"no-store"});if(!response.ok)return;
+  const data=await response.json();
+  const ns=(tag,content,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=content||"";return el};
+  for(const [key,selector] of [["services","#hizmetler .cards-grid"],["reasons","#nedenbiz .cards-grid"]]){
+   if(!Array.isArray(data[key]))continue;const parent=document.querySelector(selector);if(!parent)continue;parent.replaceChildren();
+   for(const item of data[key]){
+    const card=ns("article","","card reveal visible");
+    card.append(ns("div",item.icon,"card-icon"),ns("h3",item.title),ns("p",item.description));parent.append(card);
+   }
+  }
+  if(Array.isArray(data.routes)){
+   const parent=document.querySelector("#guzergahlar .routes-grid");if(parent){parent.replaceChildren();
+    for(const item of data.routes){
+     const a=ns("a","","route-tile");
+     const href=String(item.href||"");
+     a.href=/^(?:#teklif|guzergahlar\/[a-z0-9-]+\.html)$/.test(href)?href:"#teklif";
+     a.append(ns("span",item.icon||"🚚","route-emoji"),ns("strong",item.title),ns("span",item.description));parent.append(a);
+    }
+   }
+  }
+  if(Array.isArray(data.faq)){
+   const parent=document.querySelector("#sss .faq");if(parent){parent.replaceChildren();
+    for(const item of data.faq){const detail=document.createElement("details");detail.append(ns("summary",item.title),ns("p",item.description));parent.append(detail)}
+   }
+  }
+ }catch(_){}
+})();
+</script>
 </body>
 </html>
