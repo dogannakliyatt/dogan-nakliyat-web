@@ -43,7 +43,7 @@ export default {async fetch(request,env){
  const url=new URL(request.url);
  if (/^\/(?:src|migrations)(?:\/|$)/i.test(url.pathname) || /^\/(?:wrangler\.jsonc|ADMIN_SETUP\.md|\.git(?:\/|$))/i.test(url.pathname)) return json({error:"Not found"},404);
  if(request.method!=="GET"&&request.method!=="HEAD"&&!url.pathname.startsWith("/api/admin/")) return json({error:"Method not allowed"},405);
- if(url.pathname==="/admin"||url.pathname==="/admin/")return env.ASSETS.fetch(new Request(new URL("/admin/index.html",url),request));
+ if(url.pathname==="/admin"||url.pathname==="/admin/"){const assetUrl=new URL("/admin/index.html",url);const response=await env.ASSETS.fetch(new Request(assetUrl,request));return response;}
  if(url.pathname==="/api/admin/login"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);return login(request,env)}
  if(url.pathname==="/api/admin/logout"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);if(request.method!=="POST")return json({error:"Method not allowed"},405);const token=cookie(request);if(token&&env.SITE_DB){const digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));await env.SITE_DB.prepare("DELETE FROM admin_sessions WHERE token_hash=?").bind(digest).run()}return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","set-cookie":"dn_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"}})}
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
