@@ -2310,6 +2310,7 @@ footer {
   if(c.seoDescription){const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=c.seoDescription;const og=document.querySelector('meta[property="og:description"]');if(og)og.content=c.seoDescription}
   for(const [key,css] of [["primaryColor","--navy"],["accentColor","--green"]])if(/^#[0-9a-fA-F]{6}$/.test(c[key]||""))document.documentElement.style.setProperty(css,c[key]);
   if(c.reviewUrl){try{const u=new URL(c.reviewUrl);if(u.protocol==="https:"){document.querySelectorAll('a.review-button').forEach(a=>{a.href=u.href})}}catch(_){}}
+  if(c.hours){const target=document.querySelector("#iletisim .contact-card:first-child p");if(target)target.textContent="Çalışma saatleri: "+c.hours}
   if(c.footerText){const foot=document.querySelector(".footer-bottom");if(foot)foot.textContent=c.footerText}
   if(c.address){const contact=document.querySelector("#iletisim .contact-card:nth-child(2) p");if(contact)contact.textContent=c.address}
   if(c.hideReviews==="true"){const reviews=document.getElementById("yorumlar");if(reviews)reviews.hidden=true}
