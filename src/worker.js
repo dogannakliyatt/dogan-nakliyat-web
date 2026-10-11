@@ -40,6 +40,12 @@ async function login(request,env){
  await env.SITE_DB.prepare("INSERT INTO admin_sessions(token_hash,expires_at) VALUES(?,?)").bind(digest,expiry).run();
  return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","cache-control":"no-store","set-cookie":"dn_session="+token+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800"}});
 }
+
+const uuid=()=>crypto.randomUUID();
+const audit=async(env,action,target="")=>{try{await env.SITE_DB.prepare("INSERT INTO admin_audit(id,action,target,created_at) VALUES(?,?,?,?)").bind(uuid(),action,target,Date.now()).run()}catch(_){}};
+const validOrigin=(request,url)=>request.headers.get("origin")===url.origin;
+const allowedImageType={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"};
+async function galleryList(env){const rows=await env.SITE_DB.prepare("SELECT id,title,sort_order,created_at FROM gallery_items ORDER BY sort_order ASC,created_at DESC LIMIT 150").all();return rows.results.map(r=>({...r,url:"/api/site/image/"+encodeURIComponent(r.id)}))}
 export default {async fetch(request,env){
  const url=new URL(request.url);
  if (/^\/(?:src|migrations)(?:\/|$)/i.test(url.pathname) || /^\/(?:wrangler\.jsonc|ADMIN_SETUP\.md|\.git(?:\/|$))/i.test(url.pathname)) return json({error:"Not found"},404);
@@ -117,6 +123,40 @@ export default {async fetch(request,env){
   }
   if(url.pathname==="/admin"||url.pathname==="/admin/")return env.ASSETS.fetch(new Request(new URL("/admin/index.html",url),request));
   return env.ASSETS.fetch(request);
+ }
+
+ if(url.pathname==="/api/site/gallery"){
+  if(!env.SITE_DB)return json([]);
+  return json(await galleryList(env));
+ }
+ if(url.pathname.startsWith("/api/site/image/")){
+  if(!env.SITE_DB||!env.MEDIA_BUCKET)return json({error:"Görsel depolama yapılandırılmadı"},503);
+  const id=url.pathname.split("/").pop();
+  if(!/^[0-9a-f-]{36}$/.test(id))return json({error:"Bulunamadı"},404);
+  const item=await env.SITE_DB.prepare("SELECT image_key FROM gallery_items WHERE id=?").bind(id).first();
+  if(!item)return json({error:"Bulunamadı"},404);
+  const obj=await env.MEDIA_BUCKET.get(item.image_key);
+  if(!obj)return json({error:"Bulunamadı"},404);
+  return new Response(request.method==="HEAD"?null:obj.body,{headers:{"content-type":obj.httpMetadata?.contentType||"image/webp","cache-control":"public,max-age=3600","x-content-type-options":"nosniff"}});
+ }
+ if(url.pathname==="/api/site/quote"){
+  if(request.method!=="POST")return json({error:"Yöntem desteklenmiyor"},405);
+  if(!validOrigin(request,url))return json({error:"Origin rejected"},403);
+  if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+  if(request.headers.get("content-type")?.split(";")[0]!=="application/json")return json({error:"JSON gerekli"},415);
+  if(Number(request.headers.get("content-length")||0)>4096)return json({error:"İstek çok büyük"},413);
+  let b;try{b=await request.json()}catch{return json({error:"Geçersiz istek"},400)}
+  for(const k of ["loading","unloading","date"])if(typeof b?.[k]!=="string"||!b[k].trim()||b[k].length>300)return json({error:"Geçersiz alan"},400);
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(b.date)||Number.isNaN(Date.parse(b.date)))return json({error:"Geçersiz tarih"},400);
+  const created=Date.now(),id=uuid();
+  await env.SITE_DB.prepare("INSERT INTO quote_requests(id,loading_address,unloading_address,moving_date,customer_name,customer_contact,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(id,b.loading.trim(),b.unloading.trim(),b.date,String(b.name||"").slice(0,100),String(b.contact||"").slice(0,100),"new",created).run();
+  return json({ok:true,id});
+ }
+ if(url.pathname==="/api/site/reviews"){
+  if(!env.SITE_DB)return json({items:[],source:"none"});
+  const row=await env.SITE_DB.prepare("SELECT value FROM site_settings WHERE key='google:cachedReviews'").bind().first();
+  if(!row)return json({items:[],source:"none"});
+  try{return json(JSON.parse(row.value))}catch{return json({items:[],source:"none"})}
  }
  if(url.pathname==="/api/site/health")return json({ok:true});
  if(url.pathname==="/api/site/content"){
