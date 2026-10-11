@@ -42,7 +42,24 @@ document.querySelector("#saveBlocks").addEventListener("click",async()=>{blockSt
 const galleryList=document.querySelector("#galleryList"),galleryStatus=document.querySelector("#galleryStatus"),leadList=document.querySelector("#leadList");
 async function getJSON(url,opts){const r=await fetch(url,opts);let data;try{data=await r.json()}catch{throw Error("Sunucu yanıtı okunamadı")};if(!r.ok)throw Error(data.error||"İstek başarısız");return data}
 function line(tag,label){const el=document.createElement(tag);el.textContent=label;return el}
-async function reloadGallery(){try{const data=await getJSON("/api/admin/gallery");document.querySelector("#mediaPanel").hidden=false;galleryList.replaceChildren();for(const item of data){const wrap=document.createElement("div"),img=document.createElement("img");img.src=item.url;img.alt=item.title||"Galeri fotoğrafı";img.loading="lazy";img.style.cssText="max-width:100%;max-height:180px;display:block;margin:12px 0";const button=document.createElement("button");button.textContent="Fotoğrafı sil";button.type="button";button.addEventListener("click",async()=>{if(!confirm("Bu fotoğraf kalıcı silinsin mi?"))return;try{await getJSON("/api/admin/gallery",{method:"DELETE",headers:{"content-type":"application/json"},body:JSON.stringify({id:item.id})});await reloadGallery()}catch(e){galleryStatus.textContent=e.message}});wrap.append(img,button);galleryList.append(wrap)}}catch(e){galleryStatus.textContent=e.message}}
+async function reloadGallery(){
+ try{
+  const data=await getJSON("/api/admin/gallery");document.querySelector("#mediaPanel").hidden=false;
+  galleryList.replaceChildren();if(!data.length)galleryList.append(line("p","Henüz fotoğraf yüklenmedi."));
+  for(const item of data){
+   const wrap=document.createElement("div"),img=document.createElement("img");
+   img.src=item.url;img.alt=item.title||"Galeri fotoğrafı";img.loading="lazy";img.style.cssText="max-width:100%;max-height:180px;display:block;margin:12px 0";
+   const title=line("label","Fotoğraf açıklaması"),input=document.createElement("input");input.value=item.title||"";input.maxLength=160;
+   const orderLabel=line("label","Sıra numarası (küçük sayı önde)"),order=document.createElement("input");
+   order.type="number";order.min="0";order.max="9999999999999";order.step="1";order.value=item.sort_order;
+   const save=line("button","Değişiklikleri kaydet");save.type="button";
+   save.addEventListener("click",async()=>{galleryStatus.textContent="Kaydediliyor...";try{await getJSON("/api/admin/gallery",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({id:item.id,title:input.value,sort_order:Number(order.value)})});galleryStatus.textContent="Kaydedildi";await reloadGallery()}catch(e){galleryStatus.textContent=e.message}});
+   const del=line("button","Fotoğrafı sil");del.type="button";
+   del.addEventListener("click",async()=>{if(!confirm("Bu fotoğraf kalıcı silinsin mi?"))return;try{await getJSON("/api/admin/gallery",{method:"DELETE",headers:{"content-type":"application/json"},body:JSON.stringify({id:item.id})});await reloadGallery()}catch(e){galleryStatus.textContent=e.message}});
+   wrap.append(img,title,input,orderLabel,order,save,del);galleryList.append(wrap);
+  }
+ }catch(e){galleryStatus.textContent=e.message}
+}
 document.querySelector("#galleryUpload").addEventListener("click",async()=>{const file=document.querySelector("#galleryFile").files[0];if(!file)return galleryStatus.textContent="Fotoğraf seç.";galleryStatus.textContent="Yükleniyor...";try{await getJSON("/api/admin/gallery",{method:"POST",headers:{"content-type":file.type},body:file});galleryStatus.textContent="Fotoğraf yüklendi";await reloadGallery()}catch(e){galleryStatus.textContent=e.message}});
 async function reloadLeads(){const status=document.querySelector("#leadStatus");try{const data=await getJSON("/api/admin/quotes");document.querySelector("#leadsPanel").hidden=false;leadList.replaceChildren();for(const q of data){const wrap=document.createElement("div");wrap.style.cssText="border-top:1px solid #ddd;margin-top:12px;padding-top:12px";wrap.append(line("strong",q.loading_address+" → "+q.unloading_address),line("p","Tarih: "+q.moving_date),line("p","Müşteri: "+(q.customer_name||"—")+" | Telefon: "+(q.customer_contact||"—")));const select=document.createElement("select");for(const [code,title] of [["new","Yeni"],["contacted","Görüşüldü"],["completed","Tamamlandı"],["cancelled","İptal"]]){const opt=document.createElement("option");opt.value=code;opt.textContent=title;select.append(opt)}select.value=q.status;select.addEventListener("change",async()=>{try{await getJSON("/api/admin/quotes",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({id:q.id,status:select.value})});status.textContent="Talep güncellendi"}catch(e){status.textContent=e.message}});wrap.append(select);leadList.append(wrap)}status.textContent=data.length+" talep bulundu"}catch(e){status.textContent=e.message}}
 document.querySelector("#refreshLeads").onclick=reloadLeads;
