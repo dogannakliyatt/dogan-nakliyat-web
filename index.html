@@ -2259,6 +2259,24 @@ footer {
 </script>
 
 <script>
+/* D1 üzerindeki bölüm başlıkları ve açıklamaları; HTML değil düz metin uygulanır. */
+(async function(){
+ try {
+  const response=await fetch("api/site/sections",{cache:"no-store"});
+  if(!response.ok)return;
+  const settings=await response.json();
+  const sections=["anasayfa","hizmetler","aracimiz","bolgeler","nedenbiz","guzergahlar","tasima-ornekleri","turkiye-haritasi","yorumlar","sss","hakkimizda","iletisim"];
+  for(const id of sections){
+   const section=document.getElementById(id);if(!section)continue;
+   const title=settings[id+":title"];
+   const desc=settings[id+":description"];
+   const titleNode=section.querySelector(id==="anasayfa"?"h1":".section-header h2");
+   const descriptionNode=section.querySelector(id==="anasayfa"?".hero-content p":".section-header p");
+   if(titleNode&&typeof title==="string"&&title.trim())titleNode.textContent=title;
+   if(descriptionNode&&typeof desc==="string"&&desc.trim())descriptionNode.textContent=desc;
+  }
+ }catch(_){}
+})();
 /* Yönetim panelinden gelen yayınlanmış içerikleri güvenli biçimde uygula. */
 (async function () {
   try {
