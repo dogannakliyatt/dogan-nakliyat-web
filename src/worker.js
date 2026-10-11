@@ -284,5 +284,26 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('heroTitle','heroSubtitle','phone','whatsapp','serviceDescription')").all();
   return json(Object.fromEntries(rows.results.map(r=>[r.key,JSON.parse(r.value)])));
  }
+ if((url.pathname==="/"||url.pathname==="/index.html")&&request.method==="GET"&&env.SITE_DB&&typeof HTMLRewriter==="function"){
+  const page=await env.ASSETS.fetch(request);
+  if(!page.ok)return page;
+  try{
+   const result=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('content:seoTitle','content:seoDescription','content:bannerUrl')").all();
+   const c=Object.fromEntries(result.results.map(r=>[r.key.slice(8),JSON.parse(r.value)]));
+   const title=typeof c.seoTitle==="string"?c.seoTitle:"",description=typeof c.seoDescription==="string"?c.seoDescription:"";
+   const canonical=url.origin+"/";
+   let image=url.origin+"/images/banner.webp";
+   try{if(c.bannerUrl){const candidate=new URL(c.bannerUrl,url.origin);if(candidate.origin===url.origin&&candidate.protocol==="https:")image=candidate.href}}catch(_){}
+   const rewriter=new HTMLRewriter()
+    .on("title",{element(el){if(title)el.setInnerContent(title)}})
+    .on('meta[name="description"]',{element(el){if(description)el.setAttribute("content",description)}})
+    .on('meta[property="og:title"]',{element(el){if(title)el.setAttribute("content",title)}})
+    .on('meta[property="og:description"]',{element(el){if(description)el.setAttribute("content",description)}})
+    .on('meta[property="og:image"]',{element(el){el.setAttribute("content",image)}})
+    .on('meta[property="og:url"]',{element(el){el.setAttribute("content",canonical)}})
+    .on('link[rel="canonical"]',{element(el){el.setAttribute("href",canonical)}});
+   const response=rewriter.transform(page);response.headers.set("cache-control","no-store");return response;
+  }catch(_){return page}
+ }
  return env.ASSETS.fetch(request);
 }};
