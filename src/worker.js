@@ -52,6 +52,22 @@ export default {async fetch(request,env){
  if(url.pathname==="/api/admin/logout"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);if(request.method!=="POST")return json({error:"Method not allowed"},405);const token=cookie(request);if(token&&env.SITE_DB){const digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));await env.SITE_DB.prepare("DELETE FROM admin_sessions WHERE token_hash=?").bind(digest).run()}return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","set-cookie":"dn_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"}})}
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
   if(!(await authorized(request,env)))return json({error:"Yönetici girişi gerekli."},403);
+  if(url.pathname==="/api/admin/sections"){
+   if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'section:%'").all();return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])))}
+   if(request.method==="PUT"){
+    if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);
+    if(request.headers.get("content-type")?.split(";")[0]!=="application/json")return json({error:"JSON gerekli"},415);
+    if(Number(request.headers.get("content-length")||0)>8192)return json({error:"İstek çok büyük"},413);
+    let body;try{body=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
+    const allowed=["anasayfa","hizmetler","aracimiz","bolgeler","nedenbiz","guzergahlar","tasima-ornekleri","turkiye-haritasi","yorumlar","sss","hakkimizda","iletisim"];
+    if(!body||!allowed.includes(body.section)||!["title","description"].includes(body.field)||typeof body.value!=="string"||body.value.length>1500)return json({error:"Geçersiz içerik"},400);
+    const key="section:"+body.section+":"+body.field;
+    await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(key,JSON.stringify(body.value)).run();
+    return json({ok:true});
+   }
+   return json({error:"Yöntem desteklenmiyor"},405);
+  }
   if(url.pathname==="/api/admin/settings"){if(request.method==="PUT"&&request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);
    if(!env.SITE_DB)return json({error:"D1 veritabanı henüz bağlanmadı."},503);
    if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings").all();return json(Object.fromEntries(rows.results.map(r=>[r.key,JSON.parse(r.value)])))}
@@ -69,6 +85,11 @@ export default {async fetch(request,env){
   }
   if(url.pathname==="/admin"||url.pathname==="/admin/")return env.ASSETS.fetch(new Request(new URL("/admin/index.html",url),request));
   return env.ASSETS.fetch(request);
+ }
+ if(url.pathname==="/api/site/sections"){
+  if(!env.SITE_DB)return json({});
+  const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'section:%'").all();
+  return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])));
  }
  if(url.pathname==="/api/site/settings"){
   if(!env.SITE_DB)return json({});
