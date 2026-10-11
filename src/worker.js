@@ -68,6 +68,51 @@ export default {async fetch(request,env){
  if(url.pathname==="/api/admin/logout"){if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);if(request.method!=="POST")return json({error:"Method not allowed"},405);const token=cookie(request);if(token&&env.SITE_DB){const digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));await env.SITE_DB.prepare("DELETE FROM admin_sessions WHERE token_hash=?").bind(digest).run()}return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json","set-cookie":"dn_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"}})}
  if(url.pathname.startsWith("/api/admin/")||url.pathname==="/admin"||url.pathname.startsWith("/admin/")){
   if(!(await authorized(request,env)))return json({error:"Yönetici girişi gerekli."},403);
+
+  if(url.pathname==="/api/admin/gallery"){
+   if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   if(request.method==="GET")return json(await galleryList(env));
+   if(!validOrigin(request,url))return json({error:"Origin rejected"},403);
+   if(request.method==="POST"){
+    if(!env.MEDIA_BUCKET)return json({error:"MEDIA_BUCKET R2 bağlanmalı"},503);
+    const type=request.headers.get("content-type")||"";
+    if(!Object.hasOwn(allowedImageType,type))return json({error:"JPEG, PNG veya WebP gerekli"},415);
+    if(Number(request.headers.get("content-length")||0)>5000000)return json({error:"Dosya en fazla 5 MB olabilir"},413);
+    const bytes=await request.arrayBuffer();if(bytes.byteLength===0||bytes.byteLength>5000000)return json({error:"Dosya boyutu geçersiz"},413);
+    const view=new Uint8Array(bytes);
+    const jpeg=view[0]===255&&view[1]===216&&view[2]===255;
+    const png=view.slice(0,8).every((v,i)=>v===[137,80,78,71,13,10,26,10][i]);
+    const webp=String.fromCharCode(...view.slice(0,4))==="RIFF"&&String.fromCharCode(...view.slice(8,12))==="WEBP";
+    if(!((type==="image/jpeg"&&jpeg)||(type==="image/png"&&png)||(type==="image/webp"&&webp)))return json({error:"Görsel içerik biçimi hatalı"},415);
+    const id=uuid(),key="gallery/"+id+allowedImageType[type];
+    await env.MEDIA_BUCKET.put(key,bytes,{httpMetadata:{contentType:type}});
+    try{await env.SITE_DB.prepare("INSERT INTO gallery_items(id,title,image_key,sort_order,created_at) VALUES(?,?,?,?,?)").bind(id,"",key,Date.now(),Date.now()).run()}catch(e){await env.MEDIA_BUCKET.delete(key);throw e}
+    await audit(env,"gallery.upload",id);return json({ok:true,id},201);
+   }
+   if(request.method==="DELETE"){
+    let b;try{b=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
+    if(typeof b?.id!=="string")return json({error:"Kimlik gerekli"},400);
+    const row=await env.SITE_DB.prepare("SELECT image_key FROM gallery_items WHERE id=?").bind(b.id).first();if(!row)return json({error:"Bulunamadı"},404);
+    await env.SITE_DB.prepare("DELETE FROM gallery_items WHERE id=?").bind(b.id).run();
+    if(env.MEDIA_BUCKET)await env.MEDIA_BUCKET.delete(row.image_key);
+    await audit(env,"gallery.delete",b.id);return json({ok:true});
+   }
+   return json({error:"Yöntem desteklenmiyor"},405);
+  }
+  if(url.pathname==="/api/admin/quotes"){
+   if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT * FROM quote_requests ORDER BY created_at DESC LIMIT 200").all();return json(rows.results)}
+   if(request.method!=="PUT"||!validOrigin(request,url))return json({error:"İstek reddedildi"},403);
+   let b;try{b=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
+   if(typeof b?.id!=="string"||!["new","contacted","completed","cancelled"].includes(b.status))return json({error:"Geçersiz durum"},400);
+   await env.SITE_DB.prepare("UPDATE quote_requests SET status=? WHERE id=?").bind(b.status,b.id).run();
+   await audit(env,"quote.status",b.id+":"+b.status);return json({ok:true});
+  }
+  if(url.pathname==="/api/admin/audit"){
+   if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
+   if(request.method!=="GET")return json({error:"Yöntem desteklenmiyor"},405);
+   const rows=await env.SITE_DB.prepare("SELECT action,target,created_at FROM admin_audit ORDER BY created_at DESC LIMIT 100").all();return json(rows.results);
+  }
   if(url.pathname==="/api/admin/content"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
    const keys=["businessName","phone","whatsapp","email","address","hours","seoTitle","seoDescription","primaryColor","accentColor","logoUrl","bannerUrl","reviewUrl","googlePlaceId","footerText","hideReviews","hideGallery","showOfferForm"];
