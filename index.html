@@ -2329,9 +2329,12 @@ footer {
   if(c.hideReviews==="true"){const reviews=document.getElementById("yorumlar");if(reviews)reviews.hidden=true}
   if(c.hideGallery==="true"){const gallery=document.querySelector("#aracimiz .gallery");if(gallery)gallery.hidden=true}
   if(c.showOfferForm==="false"){const form=document.querySelector("#offerForm");if(form)form.closest(".form-card").hidden=true}
-  for(const [key,selector] of [["logoUrl",".brand img"],["bannerUrl",".hero img"]]){
-   if(!c[key])continue;try{const u=new URL(c[key],location.origin);if(u.origin===location.origin&&u.protocol==="https:"){const img=document.querySelector(selector);if(img)img.src=u.href}}catch(_){}
-  }
+  if(c.logoUrl){try{const u=new URL(c.logoUrl,location.origin);if(u.origin===location.origin&&u.protocol==="https:"){const img=document.querySelector(".brand img");if(img)img.src=u.href}}catch(_){}}
+  if(c.bannerUrl){try{const u=new URL(c.bannerUrl,location.origin);if(u.origin===location.origin&&u.protocol==="https:"){
+   const heroImg=document.querySelector(".hero-image img");if(heroImg)heroImg.src=u.href;
+   const banner=document.querySelector(".banner");if(banner){banner.style.backgroundImage="linear-gradient(90deg,rgba(13,29,52,.94),rgba(13,29,52,.75),rgba(13,29,52,.2)),url("+JSON.stringify(u.href)+")";banner.style.backgroundPosition="center";banner.style.backgroundSize="cover"}
+  }}catch(_){}}
+
  }catch(_){}
 })();
 </script>
