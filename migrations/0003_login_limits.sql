@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS admin_login_attempts (client_key TEXT PRIMARY KEY, attempts INTEGER NOT NULL DEFAULT 0, blocked_until INTEGER NOT NULL DEFAULT 0);
