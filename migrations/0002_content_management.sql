@@ -25,3 +25,9 @@ CREATE TABLE IF NOT EXISTS admin_audit (
 CREATE INDEX IF NOT EXISTS idx_quote_created ON quote_requests(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_gallery_sort ON gallery_items(sort_order,created_at);
 CREATE INDEX IF NOT EXISTS idx_admin_audit ON admin_audit(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS quote_rate_limits (
+ client_key TEXT PRIMARY KEY,
+ attempts INTEGER NOT NULL DEFAULT 0,
+ window_expires INTEGER NOT NULL DEFAULT 0
+);
