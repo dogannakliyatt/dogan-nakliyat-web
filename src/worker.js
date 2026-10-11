@@ -250,7 +250,7 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   if(Number(request.headers.get("content-length")||0)>4096)return json({error:"İstek çok büyük"},413);
   let b;try{b=await request.json()}catch{return json({error:"Geçersiz istek"},400)}
   for(const k of ["loading","unloading","date"])if(typeof b?.[k]!=="string"||!b[k].trim()||b[k].length>300)return json({error:"Geçersiz alan"},400);
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(b.date)||Number.isNaN(Date.parse(b.date)))return json({error:"Geçersiz tarih"},400);
+  if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(b.date)||Number.isNaN(Date.parse(b.date)))return json({error:"Geçersiz tarih"},400);
   const name=String(b.name||"").trim(),contact=String(b.contact||"").trim();
   if(!name||name.length>100||!contact||contact.length>30||!/^[+0-9 ()-]{7,30}$/.test(contact))return json({error:"Ad ve geçerli iletişim numarası gerekli"},400);
   const ip=request.headers.get("cf-connecting-ip")||"unknown";
