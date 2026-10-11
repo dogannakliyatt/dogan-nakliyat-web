@@ -54,7 +54,7 @@ export default {async fetch(request,env){
   if(!(await authorized(request,env)))return json({error:"Yönetici girişi gerekli."},403);
   if(url.pathname==="/api/admin/content"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
-   const keys=["businessName","phone","whatsapp","email","address","hours","seoTitle","seoDescription","primaryColor","accentColor","logoUrl","bannerUrl","reviewUrl","googlePlaceId","footerText","googleReviewsStatus","hideReviews","hideGallery","showOfferForm"];
+   const keys=["businessName","phone","whatsapp","email","address","hours","seoTitle","seoDescription","primaryColor","accentColor","logoUrl","bannerUrl","reviewUrl","googlePlaceId","footerText","hideReviews","hideGallery","showOfferForm"];
    if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT key,value FROM site_settings WHERE key LIKE 'content:%'").all();return json(Object.fromEntries(rows.results.map(r=>[r.key.slice(8),JSON.parse(r.value)])))}
    if(request.method==="PUT"){
     if(request.headers.get("origin")!==url.origin)return json({error:"Origin rejected"},403);
@@ -67,7 +67,8 @@ export default {async fetch(request,env){
     if(body.key==="email"&&value&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))return json({error:"Geçersiz e-posta"},400);
     if(["primaryColor","accentColor"].includes(body.key)&&value&&!/^#[0-9a-fA-F]{6}$/.test(value))return json({error:"Renk #RRGGBB biçiminde olmalı"},400);
     if(["hideReviews","hideGallery","showOfferForm"].includes(body.key)&&!["true","false",""].includes(value))return json({error:"true veya false kullanın"},400);
-    if(["logoUrl","bannerUrl","reviewUrl"].includes(body.key)&&value){try{const u=new URL(value,url.origin);if(u.protocol!=="https:"||u.username||u.password||u.origin!==url.origin)return json({error:"Görsel/bağlantı aynı site altında HTTPS olmalı"},400)}catch{return json({error:"Geçersiz URL"},400)}}
+    if(["logoUrl","bannerUrl"].includes(body.key)&&value){try{const u=new URL(value,url.origin);if(u.protocol!=="https:"||u.username||u.password||u.origin!==url.origin)return json({error:"Görsel/bağlantı aynı site altında HTTPS olmalı"},400)}catch{return json({error:"Geçersiz URL"},400)}}
+    if(body.key==="reviewUrl"&&value){try{const u=new URL(value);if(u.protocol!=="https:"||u.username||u.password)return json({error:"HTTPS bağlantısı gerekli"},400)}catch{return json({error:"Geçersiz URL"},400)}}
     await env.SITE_DB.prepare("INSERT INTO site_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind("content:"+body.key,JSON.stringify(value)).run();
     return json({ok:true});
    }
