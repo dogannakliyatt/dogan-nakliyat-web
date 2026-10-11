@@ -49,7 +49,7 @@ async function galleryList(env){const rows=await env.SITE_DB.prepare("SELECT id,
 export default {async fetch(request,env){
  const url=new URL(request.url);
  if (/^\/(?:src|migrations)(?:\/|$)/i.test(url.pathname) || /^\/(?:wrangler\.jsonc|ADMIN_SETUP\.md|\.git(?:\/|$))/i.test(url.pathname)) return json({error:"Not found"},404);
- if(request.method!=="GET"&&request.method!=="HEAD"&&!url.pathname.startsWith("/api/admin/")) return json({error:"Method not allowed"},405);
+ if(request.method!=="GET"&&request.method!=="HEAD"&&!url.pathname.startsWith("/api/admin/")&&url.pathname!=="/api/site/quote") return json({error:"Method not allowed"},405);
  if(url.pathname==="/admin"||url.pathname==="/admin/"||url.pathname==="/admin/index.html"){
   // Serve HTML as an in-memory response to avoid the static-assets canonical redirect loop.
   return new Response(ADMIN_HTML,{status:200,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","x-frame-options":"DENY"}});
