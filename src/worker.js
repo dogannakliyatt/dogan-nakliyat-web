@@ -48,6 +48,12 @@ export default {async fetch(request,env){
   // Serve HTML as an in-memory response to avoid the static-assets canonical redirect loop.
   return new Response(ADMIN_HTML,{status:200,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","x-frame-options":"DENY"}});
  }
+
+ if(url.pathname==="/api/admin/logs"){
+  if(!(await authorized(request,env)))return json({error:"Yönetici girişi gerekli"},403);
+  if(request.method!=="GET")return json({error:"Method not allowed"},405);
+  return json({message:"İşlem kayıtları henüz etkin değil. Bu sürümde yalnızca oturum denetimi vardır."});
+ }
  if(url.pathname==="/api/admin/status"){
   if(request.method!=="GET")return json({error:"Method not allowed"},405);
   return json({authenticated:await authorized(request,env)});
