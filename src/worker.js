@@ -128,6 +128,13 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(syncGoogleReviews(e
     try{await env.SITE_DB.prepare("INSERT INTO gallery_items(id,title,image_key,sort_order,created_at) VALUES(?,?,?,?,?)").bind(id,"",key,Date.now(),Date.now()).run()}catch(e){await env.MEDIA_BUCKET.delete(key);throw e}
     await audit(env,"gallery.upload",id);return json({ok:true,id},201);
    }
+   if(request.method==="PATCH"){
+    let b;try{b=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
+    if(typeof b?.id!=="string"||typeof b.title!=="string"||b.title.length>160||!Number.isSafeInteger(b.sort_order)||b.sort_order<0||b.sort_order>9999999999999)return json({error:"Geçersiz galeri bilgisi"},400);
+    const result=await env.SITE_DB.prepare("UPDATE gallery_items SET title=?,sort_order=? WHERE id=?").bind(b.title.trim(),b.sort_order,b.id).run();
+    if(!result.meta?.changes)return json({error:"Görsel bulunamadı"},404);
+    await audit(env,"gallery.edit",b.id);return json({ok:true});
+   }
    if(request.method==="DELETE"){
     let b;try{b=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
     if(typeof b?.id!=="string")return json({error:"Kimlik gerekli"},400);
