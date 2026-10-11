@@ -43,7 +43,7 @@ async function login(request,env){
 
 async function syncGoogleReviews(env){
  const {GOOGLE_CLIENT_ID:id,GOOGLE_CLIENT_SECRET:secret,GOOGLE_REFRESH_TOKEN:refresh,GOOGLE_BUSINESS_LOCATION:location}=env;
- if(!id||!secret||!refresh||!/^accounts\\/[^/]+\\/locations\\/[^/]+$/.test(location||"")||!env.SITE_DB)throw Error("Google Business Profile OAuth yapılandırılmadı");
+ if(!id||!secret||!refresh||!/^accounts\/[A-Za-z0-9_-]+\/locations\/[A-Za-z0-9_-]+$/.test(location||"")||!env.SITE_DB)throw Error("Google Business Profile OAuth yapılandırılmadı");
  const form=new URLSearchParams({client_id:id,client_secret:secret,refresh_token:refresh,grant_type:"refresh_token"});
  const tokenRes=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});
  if(!tokenRes.ok)throw Error("Google OAuth token alınamadı");
