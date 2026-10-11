@@ -11,7 +11,6 @@
     "not_found_handling": "404-page"
   },
   "triggers": {"crons": ["0 */6 * * *"]},
-  "r2_buckets": [{"binding":"MEDIA_BUCKET","bucket_name":"dogan-nakliyat-media"}],
   "d1_databases": [
     {
       "binding": "SITE_DB",
