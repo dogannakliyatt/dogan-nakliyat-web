@@ -20,10 +20,20 @@ async function login(request,env){
  if(Number(request.headers.get("content-length")||0)>4096)return json({error:"İstek çok büyük"},413);
  let body;try{body=await request.json()}catch{return json({error:"Geçersiz istek"},400)}
  if(typeof body?.password!=="string"||body.password.length>256)return json({error:"Geçersiz giriş"},400);
+ const ip=request.headers.get("cf-connecting-ip")||"unknown";
+ const clientKey=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ip))));
+ const limit=await env.SITE_DB.prepare("SELECT attempts,blocked_until FROM admin_login_attempts WHERE client_key=?").bind(clientKey).first();
+ if(limit?.blocked_until>Date.now())return json({error:"Çok fazla deneme, daha sonra tekrar deneyin"},429);
  const attempt=await hashPassword(body.password,env.ADMIN_PASSWORD_SALT);
  const a=new TextEncoder().encode(attempt),b=new TextEncoder().encode(env.ADMIN_PASSWORD_HASH);
  let difference=a.length^b.length;for(let i=0;i<Math.min(a.length,b.length);i++)difference|=a[i]^b[i];
- if(difference)return json({error:"Giriş başarısız"},401);
+ if(difference){
+  const attempts=(limit?.blocked_until&&limit.blocked_until<Date.now())?1:(limit?.attempts||0)+1;
+  const until=attempts>=5?Date.now()+15*60*1000:0;
+  await env.SITE_DB.prepare("INSERT INTO admin_login_attempts(client_key,attempts,blocked_until) VALUES(?,?,?) ON CONFLICT(client_key) DO UPDATE SET attempts=excluded.attempts,blocked_until=excluded.blocked_until").bind(clientKey,attempts,until).run();
+  return json({error:"Giriş başarısız"},401);
+ }
+ await env.SITE_DB.prepare("DELETE FROM admin_login_attempts WHERE client_key=?").bind(clientKey).run();
  const token=randomToken(),digest=hex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token))));
  const expiry=Date.now()+8*60*60*1000;
  await env.SITE_DB.prepare("INSERT INTO admin_sessions(token_hash,expires_at) VALUES(?,?)").bind(digest,expiry).run();
