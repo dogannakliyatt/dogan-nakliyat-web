@@ -2352,5 +2352,27 @@ footer {
  try{const res=await fetch("/api/site/gallery");if(!res.ok)return;const items=await res.json();if(!items.length)return;const gallery=document.querySelector("#aracimiz .gallery");if(!gallery)return;gallery.replaceChildren();for(const item of items){const img=document.createElement("img");img.src=item.url;img.alt=item.title||"Doğan Nakliyat araç ve taşıma görseli";img.loading="lazy";img.style.cssText="width:100%;height:200px;object-fit:cover;border-radius:12px";gallery.append(img)}}catch(_){}
 })();
 </script>
+<script>
+/* Only replace manual testimonials after a successful authorized Google sync. */
+(async function(){
+ try{
+  const response=await fetch("/api/site/reviews",{cache:"no-store"});if(!response.ok)return;
+  const data=await response.json();if(data.source!=="google"||!Array.isArray(data.items))return;
+  const list=document.querySelector("#yorumlar .reviews-grid");if(!list)return;
+  list.replaceChildren();
+  for(const item of data.items.slice(0,15)){
+   const article=document.createElement("article");article.className="card reveal visible";
+   const stars=document.createElement("div");stars.className="review-stars";stars.textContent="★".repeat(Math.max(0,Math.min(5,Number(item.rating)||0)))+"☆".repeat(5-Math.max(0,Math.min(5,Number(item.rating)||0)));
+   const text=document.createElement("p");text.className="review-text";text.textContent=item.comment||"Yıldızlı değerlendirme";
+   const author=document.createElement("div");author.className="review-author";author.textContent=item.author||"Google kullanıcısı";
+   const source=document.createElement("div");source.className="review-source";source.textContent="Google Yorumu";
+   article.append(stars,text,author,source);list.append(article);
+  }
+  const header=document.querySelector("#yorumlar .section-header p");
+  if(header&&data.items.length)header.textContent="Google işletme profilimizden güncellenen doğrulanmış müşteri yorumları.";
+  if(!data.items.length&&header)header.textContent="Google üzerinde henüz görüntülenecek yorum yok.";
+ }catch(_){}
+})();
+</script>
 </body>
 </html>
