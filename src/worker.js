@@ -149,9 +149,11 @@ export default {async scheduled(event,env,ctx){if(env.SITE_DB){ctx.waitUntil(env
   if(url.pathname==="/api/admin/quotes"){
    if(!env.SITE_DB)return json({error:"Veritabanı bağlantısı yok"},503);
    if(request.method==="GET"){const rows=await env.SITE_DB.prepare("SELECT * FROM quote_requests ORDER BY created_at DESC LIMIT 200").all();return json(rows.results)}
-   if(request.method!=="PUT"||!validOrigin(request,url))return json({error:"İstek reddedildi"},403);
+   if(!["PUT","DELETE"].includes(request.method)||!validOrigin(request,url))return json({error:"İstek reddedildi"},403);
    let b;try{b=await request.json()}catch{return json({error:"Geçersiz JSON"},400)}
-   if(typeof b?.id!=="string"||!["new","contacted","completed","cancelled"].includes(b.status))return json({error:"Geçersiz durum"},400);
+   if(typeof b?.id!=="string"||!/^[0-9a-f-]{36}$/.test(b.id))return json({error:"Geçersiz talep"},400);
+   if(request.method==="DELETE"){await env.SITE_DB.prepare("DELETE FROM quote_requests WHERE id=?").bind(b.id).run();await audit(env,"quote.delete",b.id);return json({ok:true})}
+   if(!["new","contacted","completed","cancelled"].includes(b.status))return json({error:"Geçersiz durum"},400);
    await env.SITE_DB.prepare("UPDATE quote_requests SET status=? WHERE id=?").bind(b.status,b.id).run();
    await audit(env,"quote.status",b.id+":"+b.status);return json({ok:true});
   }
