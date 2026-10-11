@@ -4,7 +4,7 @@ const headers={"x-content-type-options":"nosniff","referrer-policy":"strict-orig
 function hex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("")}
 async function hashPassword(password,salt){
  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
- return hex(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:new TextEncoder().encode(salt),iterations:210000,hash:"SHA-256"},key,256)));
+ return hex(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:new TextEncoder().encode(salt),iterations:100000,hash:"SHA-256"},key,256)));
 }
 function randomToken(){return hex(crypto.getRandomValues(new Uint8Array(32)))}
 function cookie(request){return /(?:^|; )dn_session=([a-f0-9]{64})(?:;|$)/.exec(request.headers.get("cookie")||"")?.[1]}
